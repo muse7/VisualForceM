@@ -1,0 +1,9 @@
+<apex:page standardController="Opportunity" standardStylesheets="false" showHeader="false" sidebar="false">
+  <html>
+        <head>
+            <meta http-equiv="refresh" content="0;URL=/apex/OpportunityContactListUpdate2?uid={!Opportunity.Id}"/>
+        </head>
+        <body></body>
+    </html>
+</apex:page>
+               
