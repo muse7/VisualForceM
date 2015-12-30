@@ -1,0 +1,16 @@
+global class contactListController {
+  
+    public list<list<String>>updateValues{get;set;}
+    
+    @RemoteAction
+    global static String updateContactRoleList (list<list<String>>updateValues) {
+        
+       /* iterate through the array and update the records. The passed-in array is a 
+        * dimensional array that contains the Rocord ID and Commission % value.
+        */
+       
+            
+        return 'Records Saved';
+    }
+    
+}
