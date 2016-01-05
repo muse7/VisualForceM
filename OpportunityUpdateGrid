@@ -1,0 +1,140 @@
+<apex:page showHeader="false" controller="contactListController" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">  
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ 
+  <apex:remoteObjects >
+        <apex:remoteObjectModel name="OpportunityContact__c" fields="Id,ContactName__c,Contact__c,Account_Name__c,Commission_Split__c"/>
+  </apex:remoteObjects>  
+    
+    
+  <head>
+      <apex:stylesheet value="{!URLFOR($Resource.slds0121, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+  </head>
+
+  <body>
+  	
+      <div class="slds" id="contactRoleUpdateListPage"> 
+          <div class="slds-text-heading--medium">Update Contact Roles </div>
+          <label id="messages"></label>
+          <div class="slds-m-top--medium"></div>
+		<table class="slds-table slds-table--bordered">
+  			<thead>
+    			<tr class="slds-text-heading--label" rowspan="2">
+      				 <th scope="col" width="300">
+                        <span class="slds-truncate">Name</span>
+                      </th>  
+                   	  <th scope="col">
+                        <span class="slds-truncate"  >%</span>
+                      </th>  
+                      <th scope="col">
+                        <span class="slds-truncate">Signer</span>
+                      </th> 
+              
+                </tr>
+             </thead>  
+           	 <tbody id="tblContent" />                                
+          </table>
+      
+          <div class="slds-m-top--medium"></div>
+             
+          <div id="controlRoleListButtons">
+                 <button class="slds-button slds-button--neutral" onclick="Update()">Update Records</button>
+          </div>
+      </div>
+      Parameters from calling page (for debugging): {!$CurrentPage.parameters.uid}
+      
+      <script>
+       	
+      	var tblContent = document.getElementById("tblContent");
+        var ocr = new SObjectModel.OpportunityContact__c();
+    
+        ocr.retrieve(
+                   {limit: 10}, 
+    
+                   function(error, records) {
+                            if (error) {
+                                alert(error.message);
+                            } else {
+                                var html = "";
+                                records.forEach(function(record) {
+                                    html = html + BuildRow(record);
+                                
+                                });
+                                tblContent.innerHTML = html;
+                            }
+                        }
+                    );
+            
+     	
+    	//Build Table Row
+      	function BuildRow(record){
+            
+            var html;
+            
+			html = "<tr class=\"slds-hint-parent\">" +
+                		"<th role=\"row\" >" + "<div>" + record.get("ContactName__c") + "</div>" +
+                            "<div class=\"slds-form-element\">" +
+                                	"<div class=\"slds-form-element__control\">" +
+                                   	 "<div class=\"slds-select_container\">" +
+                                      "<select id=\"selectSample1\" class=\"slds-select\">" +
+                                        "<option>Producer</option>" +           
+               				 "</select></div></div></div></th>" +
+                	     "<td valign=\"top\"><input id=" + record.get("Id") + " type=\"number\" style=\"width: 50px;\" value=" + record.get("Commission_Split__c") + "></td>" +
+                		 "<td valign=\"top\">" + 
+            			          "<input name=\"checkbox\" type=\"checkbox\" id=\"checkbox\" />" +
+                "</td></tr>"; 
+               			
+
+               
+            
+            return html
+        }
+      
+      
+      	 // Update records in database
+         function Update(){
+             
+               var inputs = document.getElementsByTagName("input");
+               var selects = document.getElementsByTagName("select");
+               var msgs = document.getElementById("messages");
+               var myarray = [];
+               var j=0;
+             // assumes even number of input boxes = 2 per row
+              for (var i=0; i < inputs.length; i +=2){
+                   
+                   if(i>0){j=i-1;}
+                  
+                   myarray.push([inputs[i].id, inputs[i].value, inputs[i+1].checked, selects[j].value]);
+              }
+			
+                
+             
+               Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.contactListController.updateContactRoleList}',
+                                                            myarray,
+                                                            function(result, event){
+                                                               if (event.status) {
+                                                                   msgs.innerHTML = msgs.innerHTML + "<br/>" +  result;
+                                        
+                                                                    } 
+                                                                else {
+                                                                    msgs.innerHTML = msgs.innerHTML + "<br/>" + event.message;
+                                                                }
+                                                              });
+                                                                                                         
+            
+            
+                    
+            }
+        
+      
+       </script> 
+  </body>
+
+    
+</html>
+   
+    
+
+    
+    
+</apex:page>
+                 
