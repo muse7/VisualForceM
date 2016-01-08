@@ -1,0 +1,213 @@
+<apex:page showHeader="false" standardcontroller="Opportunity" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">  
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <apex:remoteObjects >
+            <apex:remoteObjectModel name="Opportunity" fields="Id,Name"/>
+        </apex:remoteObjects>  
+        
+        <apex:remoteObjects >
+            <apex:remoteObjectModel name="Account" fields="Id,Name"/>
+        </apex:remoteObjects>  
+        
+        <apex:remoteObjects >
+            <apex:remoteObjectModel name="Product2" fields="Id,Name"/>
+        </apex:remoteObjects>  
+    
+        <head>
+          <apex:stylesheet value="{!URLFOR($Resource.slds0121, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+          <apex:includeScript value="/canvas/sdk/js/publisher.js" />
+        </head>
+    
+        <body>
+            <script>
+             // Subscribe to Save Click Event    
+                Sfdc.canvas.publisher.subscribe(
+                { name : "publisher.post", onData:function(e) { saveRecord(); } }
+                );              
+                
+            </script>
+            
+             <div class="slds" id="parentDiv">
+                
+                <!-- <div class="slds-text-heading--medium">Opportunity Close</div>-->
+                 <!-- Error Messages from DML operations -->
+                 <label id="messages"></label>
+                 
+                 <!-- LDS Stacked Form Style -->
+                 <div class="slds-form--stacked">
+                     
+                     <!-- Opportunity Section Banner -->
+                     <h3 class="slds-section-title--divider">Opportunity Information</h3>
+                     
+                     <!-- Fields -->
+                     <div class="slds-form-element slds-has-divider--bottom">
+                      <span class="slds-form-element__label">Opportunity Name</span>
+                      <div class="slds-form-element__control">
+                        <span class="slds-form-element__static" id="opptyName">Read Only</span>
+                      </div>
+                    </div>
+                    
+                     <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="opptyType">Type</label>
+                      <div class="slds-form-element__control">
+                        <div class="slds-select_container">
+                          <select id="opptyTypeSelect" class="slds-select">
+                            <option>New Business</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Spacer -->
+                    <div class="slds-m-top--medium"></div>
+                    <!-- Product Section Banner -->
+                     <h3 class="slds-section-title--divider">Product Information</h3>
+                     <div class="slds-lookup" data-select="multi" data-scope="single" data-typeahead="true">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="lookup">Product Name</label>
+                            <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                              <svg aria-hidden="true" class="slds-input__icon">
+                                <use xlink:href="{!URLFOR($Resource.slds0121, 'assets/icons/standard-sprite/svg/symbols.svg#product')}"></use>
+    
+                              </svg>
+                              <input id="productLookup" onkeyup="ProductSearch()" class="slds-input" type="text" aria-autocomplete="list" role="combobox" aria-expanded="true" aria-activedescendant="" />
+                            </div>
+                            <div class="slds-lookup__menu" role="listbox" id="productListDiv" style="display: none;">
+                                <ul class="slds-lookup__list" role="presentation" id="productList">
+                       
+                                </ul>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                    
+                     <!-- Spacer -->
+                     <div class="slds-m-top--large"></div>
+
+                     <!-- Party Account Section Banner -->
+                     <h3 class="slds-section-title--divider">Party Account Information</h3>
+                     <div class="slds-form-element">
+                         <label class="slds-form-element__label" for="sample1">Account Number</label>
+                         <div class="slds-form-element__control">
+                             <input id="accountID" class="slds-input" type="text" placeholder="Placeholder Text" />
+                         </div>
+                     
+                         <ul id="accountList" class="slds-list--vertical slds-has-dividers--bottom slds-has-block-links--space slds-has-list-interactions">
+                             <li class="slds-list__item"><a href="#void">List item block level link with bottom divider with space with list item interactions</a></li>
+                             <li class="slds-list__item"><a href="#void">List Item</a></li>
+                             <li class="slds-list__item"><a href="#void">List Item</a></li>
+                         </ul>
+                         
+                     </div>
+                     
+                     
+                 </div>
+               
+            </div>
+            <!-- HTML END -->
+            
+            <script>
+                 //Global Variables
+                var oppty = new SObjectModel.Opportunity();
+                var opptyName = document.getElementById("opptyName");
+                 
+                var account = new SObjectModel.Account();
+                var accountList = document.getElementById("accountList");
+                var accountID = document.getElementById("accountID");
+                
+                var prdLkp = document.getElementById("productLookup");
+                var prodList = document.getElementById("productList");
+                var prodListDiv = document.getElementById("productListDiv");    
+            
+                var msg = document.getElementById("messages");
+                
+                // Load Opportunity Record
+                oppty.retrieve({where: {Id: {eq: '00661000002fLDq'}}}, 
+    
+                   function(error, records) {
+                            if (error) {
+                                msg = msg + error.message + "<br/>";
+                            } else {
+                                records.forEach(function(record) {
+                                    opptyName.innerHTML = record.get("Name")
+                                });
+                                
+                            }
+                        }
+                    );
+            
+                //Load Account List
+                account.retrieve({limit: 5}, 
+    
+                   function(error, records) {
+                            if (error) {
+                                msg = msg + error.message + "<br/>";
+                            } else {
+                                var html="";
+                                records.forEach(function(record) {
+                                    html = html + "<li class=\"slds-list__item\"><a data-id=" + record.get("Id") + ">" + 
+                                        record.get("Name") + "</a></li>";
+                                });
+                                accountList.innerHTML = html;
+                            }
+                        }
+                    );
+            
+                //Account List click listner
+                accountList.addEventListener("click", function(e) {
+                        accountID.value = e.target.getAttribute("data-id");
+                    
+                });
+                
+                //Product Search
+                function ProductSearch()
+                {
+                    var prod = new SObjectModel.Product2();
+                    
+                    prodListDiv.style.display = "block";
+                 
+                    prod.retrieve({where: {Name: {like: prdLkp.value + '%'}}}, 
+    
+                   function(error, records) {
+                            if (error) {
+                                msg = msg + error.message + "<br/>";
+                            } else {
+                                var listhtml="";
+                                records.forEach(function(record) {
+                                   listhtml = listhtml + "<li class=\"slds-list__item\"><a name-id=" + record.get("Name") + " data-id=" + record.get("Id") + ">" + 
+                                                                     record.get("Name") + "</a></li>";
+                                });
+                                prodList.innerHTML = listhtml;
+                            }
+                        }
+                    );
+                    
+                }
+            
+                //Product List click listner
+                prodList.addEventListener("click", function(e) {
+                        prdLkp.value = e.target.text;
+                        prodListDiv.style.display = "none";
+                });
+            
+                // Enable Save Button
+                Sfdc.canvas.publisher.publish({ name : "publisher.setValidForSubmit", payload:"true"});
+                
+               
+                function saveRecord()
+                {
+                    msg.innerHTML = "SAVED!";  
+                    
+                    
+                }
+            </script>
+            
+        </body>
+    
+    
+    
+    </html>
+    
+    
+    
+</apex:page>
